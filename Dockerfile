@@ -1,4 +1,11 @@
-FROM ubuntu:latest
-LABEL authors="acer"
+FROM python:3.11-alpine
 
-ENTRYPOINT ["top", "-b"]
+COPY requirements.txt requirements.txt
+
+RUN pip3 install -r requirements.txt
+
+WORKDIR /app
+
+COPY . /app
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
