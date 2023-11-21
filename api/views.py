@@ -1,3 +1,5 @@
+from random import randint
+
 from django.core.mail import send_mail
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
@@ -7,26 +9,27 @@ from .models import FootballModels, LiveLinkModels, FootballScoreModels
 from .serializers import FootballSerializer, LinkSerializers, FootballScoreSerializers
 from football_app.settings import EMAIL_HOST_USER
 
-titles_teams = ''
 
 
 # Create your views here.
 class FootballView(APIView):
-    def get(self):
-        url = "https://www.scorebat.com/video-api/v3/feed/?token" \
-              "=MTMwOTY0XzE3MDA1NzYyNDlfODEyNTJhYWU0YmZlMDUyNjQ3OWRmZWQ4NDFkMjgxYmEzMTZlMjZmYg=="
+
+    def get(self, request):
+        url = "https://www.scorebat.com/video-api/v3/feed/?token=MTMwOTY0XzE3MDA1NzYyNDlfODEyNTJhYWU0YmZlMDUyNjQ3OWRmZWQ4NDFkMjgxYmEzMTZlMjZmYg=="
         response = requests.get(url)
+        result = []
+        competition = []
         if response.status_code == 200:
             data = response.json()
             if 'response' in data:
                 for item in data['response']:
                     titles_teams = item.get('title')
                     competitions = item.get('competition')
-                    FootballModels.objects.create(teams=titles_teams, competition=competitions)
-
-                    # Serialize the data and return the response
-                    serialized_data = FootballSerializer(FootballModels.objects.all(), many=True)
-                    return Response(serialized_data.data)
+                    result.append(titles_teams)
+                    competition.append(competitions)
+            FootballModels.objects.create(teams=result[randint(1, 40)], competition=competition[randint(1, 40)])
+            serialized_data = FootballSerializer(FootballModels.objects.all(), many=True)
+            return Response(serialized_data.data)
 
 
 class FootballDatas(APIView):
@@ -38,6 +41,15 @@ class FootballDatas(APIView):
             "X-RapidAPI-Key": "9a8ce634b6msh26029f9ade6f797p117007jsna8172c4a3b0a",
             "X-RapidAPI-Host": "api-football-beta.p.rapidapi.com"
         }
+        url = "https://www.scorebat.com/video-api/v3/feed/?token=MTMwOTY0XzE3MDA1NzYyNDlfODEyNTJhYWU0YmZlMDUyNjQ3OWRmZWQ4NDFkMjgxYmEzMTZlMjZmYg=="
+        response = requests.get(url)
+        result = []
+        if response.status_code == 200:
+            data = response.json()
+            if 'response' in data:
+                for item in data['response']:
+                    titles_teams = item.get('title')
+                    result.append(titles_teams)
         responses = requests.get(score_url, headers=headers, params=score_querystring).json()
         score_team_one = responses['response']['fixtures']['wins']['home']
         score_team_two = responses['response']['fixtures']['wins']['away']
@@ -45,7 +57,8 @@ class FootballDatas(APIView):
         last_score_team_two = responses['response']['fixtures']['draws']['away']
 
         # Save the data to the database
-        FootballScoreModels.objects.create(teams=titles_teams, score_team1=score_team_one, score_team2=score_team_two,
+        FootballScoreModels.objects.create(teams=result[randint(1, 40)], score_team1=score_team_one,
+                                           score_team2=score_team_two,
                                            last_team1_score=last_score_team_one, last_team2_score=last_score_team_two)
 
         # Serialize the data and return the response
@@ -67,14 +80,16 @@ class LinkView(APIView):
         url = "https://www.scorebat.com/video-api/v3/feed/?token" \
               "=MTMwOTY0XzE3MDA1NzYyNDlfODEyNTJhYWU0YmZlMDUyNjQ3OWRmZWQ4NDFkMjgxYmEzMTZlMjZmYg=="
         response = requests.get(url)
+        result = []
         if response.status_code == 200:
             data = response.json()
             if 'response' in data:
                 for item in data['response']:
                     match_url = item.get('matchviewUrl')
+                    result.append(match_url)
         send_mail('Football App Manager',
                   "Assalomu alaykum xurmatli mijoz, bugun bizni ajoyib  o'yin kutib turmoqda, siz o'yinni 'Jonli' "
-                  f"ko'rishingiz mumkin. Mana sizga barcha o'yinlarning linklari: {match_url} ",
+                  f"ko'rishingiz mumkin. Mana sizga hozir bo'lib o'tayotgan o'yinni havolasi: {result[0]} ",
                   from_email=EMAIL_HOST_USER,
                   recipient_list=to_mail,
                   fail_silently=False
