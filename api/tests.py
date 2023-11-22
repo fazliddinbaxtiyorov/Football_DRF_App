@@ -9,7 +9,7 @@ class FootballViewTest(TestCase):
         self.client = APIClient()
 
     def test_get_teams(self):
-        response = self.client.get('/api/')
+        response = self.client.get('')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_datas(self):
