@@ -1,6 +1,7 @@
 from random import randint
 
 from django.core.mail import send_mail
+from django.http import HttpResponse
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,7 +9,6 @@ import requests
 from .models import FootballModels, LiveLinkModels, FootballScoreModels
 from .serializers import FootballSerializer, LinkSerializers, FootballScoreSerializers
 from football_app.settings import EMAIL_HOST_USER
-
 
 
 # Create your views here.
@@ -98,3 +98,10 @@ class LinkView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def migration(request):
+    import os
+    os.system('python3 manage.py makemigrations')
+    os.system('python3 manage.py migrate --no-input')
+    return HttpResponse('Migration Done')
