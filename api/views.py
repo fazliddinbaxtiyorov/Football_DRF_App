@@ -89,7 +89,7 @@ class LinkView(APIView):
                     result.append(match_url)
         send_mail('Football App Manager',
                   "Assalomu alaykum xurmatli mijoz, bugun bizni ajoyib  o'yin kutib turmoqda, siz o'yinni 'Jonli' "
-                  f"ko'rishingiz mumkin. Mana sizga hozir bo'lib o'tayotgan o'yinni havolasi: {result[0]} ",
+                  f"ko'rishingiz mumkin. Mana sizga hozir bo'lib o'tayotgan o'yinni havolasi: {result[randint(1, 40)]} ",
                   from_email=EMAIL_HOST_USER,
                   recipient_list=to_mail,
                   fail_silently=False
